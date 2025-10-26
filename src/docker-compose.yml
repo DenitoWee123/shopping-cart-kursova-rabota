@@ -1,0 +1,50 @@
+services:
+  shopping-cart-service:
+    build: .
+    image: ghcr.io/your-username/shopping-cart:latest
+    container_name: shopping-cart-local
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}?currentSchema=${APP_SCHEMA}
+      SPRING_DATASOURCE_USERNAME: ${APP_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${APP_DB_PASSWORD}
+      APP_DB_USER: ${APP_DB_USER}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
+      APP_SCHEMA: ${APP_SCHEMA}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+    depends_on:
+      flyway-migrator:
+        condition: service_completed_successfully
+    networks:
+      - infrastructure-network-ext
+
+  flyway-migrator:
+    image: flyway/flyway:latest
+    container_name: shopping-cart-migrator
+    command: migrate
+    volumes:
+      - ./src/main/resources/db/migration:/flyway/sql
+    env_file:
+      - .env
+    environment:
+      FLYWAY_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}?currentSchema=${APP_SCHEMA}
+      FLYWAY_USER: ${APP_DB_USER}
+      FLYWAY_PASSWORD: ${APP_DB_PASSWORD}
+      FLYWAY_SCHEMAS: ${APP_SCHEMA}
+      FLYWAY_LOCATIONS: 'filesystem:/flyway/sql'
+    networks:
+      - infrastructure-network-ext
+
+networks:
+  infrastructure-network-ext:
+    name: build_infrastructure-network
+    external: true
+
+volumes:
+  db-data:
+    external: true
+    name: build_db-data

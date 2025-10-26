@@ -1,0 +1,84 @@
+name: Build and Deploy SNAPSHOT Artifact
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  IMAGE_TAG_BASE: ghcr.io/${{ github.repository_owner }}
+
+jobs:
+  BuildAndDeploySNAPSHOT:
+    name: 'Build And Deploy SNAPSHOT Artifact'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: 'read'
+      packages: 'write'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+          cache-dependency-path: '.gitignore'
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build with Maven
+        run: mvn clean --batch-mode --update-snapshots package
+
+      - name: SetEnv
+        run: |
+          echo "APP_VERSION"=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
+          echo "APP_NAME"=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout) >> $GITHUB_ENV
+      - run: |
+          echo "IMAGE_TAG=${{ env.IMAGE_TAG_BASE }}/${{ env.APP_NAME }}" >> $GITHUB_ENV
+
+      - name: Build and tag image
+        run: |
+          echo Build docker image: $IMAGE_TAG:latest-SNAPSHOT
+          docker build -t $IMAGE_TAG:latest-SNAPSHOT .
+          docker build -t $IMAGE_TAG-flyway:latest-SNAPSHOT --file flyway.Dockerfile .
+
+      - name: Push image to GHCR
+        run: |
+          docker push ${{ env.IMAGE_TAG }}:latest-SNAPSHOT
+          docker push ${{ env.IMAGE_TAG }}-flyway:latest-SNAPSHOT
+
+      - name: Tag image to SHA
+        run: |
+          docker tag ${{ env.IMAGE_TAG }}:latest-SNAPSHOT ${{ env.IMAGE_TAG }}:${GITHUB_SHA::7}
+          docker tag ${{ env.IMAGE_TAG }}-flyway:latest-SNAPSHOT ${{ env.IMAGE_TAG }}-flyway:${GITHUB_SHA::7}
+      - name: Push SHA image to GHCR
+        run: |
+          docker push ${{ env.IMAGE_TAG }}:${GITHUB_SHA::7}
+          docker push ${{ env.IMAGE_TAG }}-flyway:${GITHUB_SHA::7}
+
+      - name: Tag image to SHA-APP-Version
+        run: |
+          docker tag ${{ env.IMAGE_TAG }}:latest-SNAPSHOT ${{ env.IMAGE_TAG }}:${APP_VERSION}
+          docker tag ${{ env.IMAGE_TAG }}-flyway:latest-SNAPSHOT ${{ env.IMAGE_TAG }}-flyway:${APP_VERSION}
+      - name: Push SHA-APP-Version image to GHCR
+        run: |
+          docker push ${{ env.IMAGE_TAG }}:${APP_VERSION}
+          docker push ${{ env.IMAGE_TAG }}-flyway:${APP_VERSION}
+
+      - name: Tag image to PR
+        run: |
+          docker tag ${{ env.IMAGE_TAG }}:latest-SNAPSHOT ${{ env.IMAGE_TAG }}:pr-${{ github.event.pull_request.number }}
+          docker tag ${{ env.IMAGE_TAG }}-flyway:latest-SNAPSHOT ${{ env.IMAGE_TAG }}-flyway:pr-${{ github.event.pull_request.number }}
+      - name: Push APP-Version-PR image to GHCR
+        run: |
+          docker push ${{ env.IMAGE_TAG }}:pr-${{ github.event.pull_request.number }}
+          docker push ${{ env.IMAGE_TAG }}-flyway:pr-${{ github.event.pull_request.number }}

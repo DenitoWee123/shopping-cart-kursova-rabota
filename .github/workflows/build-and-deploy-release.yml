@@ -1,0 +1,104 @@
+name: Build and Deploy Release Artifact
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+  if: github.event.pull_request.merged == true
+  workflow_dispatch:
+
+env:
+  IMAGE_TAG_BASE: ghcr.io/${{ github.repository_owner }}
+
+jobs:
+  BuildAndDeployReleaseArtifact:
+    name: 'Build and Deploy Release Artifact'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: 'write'
+      packages: 'write'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+          cache-dependency-path: '.gitignore'
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Remove SNAPSHOT
+        run: mvn versions:set -DremoveSnapshot
+
+      - name: SetEnv
+        run: |
+          echo "APP_VERSION"=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
+          echo "APP_NAME"=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout) >> $GITHUB_ENV
+      - run: |
+          echo "IMAGE_TAG=${{ env.IMAGE_TAG_BASE }}/${{ env.APP_NAME }}" >> $GITHUB_ENV
+
+      - name: Build with Maven
+        run: mvn clean --batch-mode package
+
+      - name: Build and tag image
+        run: |
+          echo Build docker image: $IMAGE_TAG:latest
+          docker build -t $IMAGE_TAG:latest .
+          docker build -t $IMAGE_TAG-flyway:latest --file flyway.Dockerfile .
+
+      - name: Push TAG
+        run: |
+          git add pom.xml
+          filesha=$(shasum target/*.jar | awk '{print $1}')
+          git config user.email "github-action@${{ github.repository_owner }}.com"
+          git config user.name "GitHub Action"
+          git commit -m "Release ${{ env.APP_VERSION }} SHA: $filesha"
+          git push          
+          git tag ${{ env.APP_VERSION }}
+          git status
+          git push origin ${{ env.APP_VERSION }}
+
+      - name: Update version to next SNAPSHOT
+        run: mvn --batch-mode release:update-versions
+
+      - name: Push next SNAPSHOT version
+        run: |
+          git add pom.xml
+          version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          git commit -m "New develop version: $version"          
+          git status
+          git push
+
+      - name: Push 'latest' image to GHCR
+        run: |
+          docker push ${{ env.IMAGE_TAG }}:latest
+          docker push ${{ env.IMAGE_TAG }}-flyway:latest
+
+      - name: Tag image to APP_VERSION
+        run: |
+          docker tag ${{ env.IMAGE_TAG }}:latest ${{ env.IMAGE_TAG }}:${APP_VERSION}
+          docker tag ${{ env.IMAGE_TAG }}-flyway:latest ${{ env.IMAGE_TAG }}-flyway:${APP_VERSION}
+      - name: Push APP_VERSION image to GHCR
+        run: |
+          docker push ${{ env.IMAGE_TAG }}:${APP_VERSION}
+          docker push ${{ env.IMAGE_TAG }}-flyway:${APP_VERSION}
+
+      - name: Tag image to SHA
+        run: |
+          docker tag ${{ env.IMAGE_TAG }}:latest ${{ env.IMAGE_TAG }}:${GITHUB_SHA::7}
+          docker tag ${{ env.IMAGE_TAG }}-flyway:latest ${{ env.IMAGE_TAG }}-flyway:${GITHUB_SHA::7}
+      - name: Push SHA image to GHCR
+        run: |
+          docker push ${{ env.IMAGE_TAG }}:${GITHUB_SHA::7}
+          docker push ${{ env.IMAGE_TAG }}-flyway:${GITHUB_SHA::7}

@@ -1,0 +1,6 @@
+CREATE TABLE app_user (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    age INT,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+);
