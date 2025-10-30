@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [closed]
     branches: [main]
-  if: github.event.pull_request.merged == true
+  if: github.event.pull_request.merged == true # this will be updated later on
   workflow_dispatch:
 
 env:
