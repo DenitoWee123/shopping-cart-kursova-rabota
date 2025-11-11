@@ -1,8 +1,6 @@
 services:
   shopping-cart-service:
-    build:
-      context: ..
-      dockerfile: src/Dockerfile
+    build: .
     image: ghcr.io/your-username/shopping-cart:latest
     container_name: shopping-cart-local
     ports:
@@ -10,7 +8,7 @@ services:
     env_file:
       - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}?currentSchema=${APP_SCHEMA}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/${POSTGRES_DB}?currentSchema=${APP_SCHEMA}
       SPRING_DATASOURCE_USERNAME: ${APP_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${APP_DB_PASSWORD}
       APP_DB_USER: ${APP_DB_USER}
@@ -29,7 +27,9 @@ services:
     container_name: shopping-cart-migrator
     command: migrate
     volumes:
-      - ./flyway_migrations:/flyway/sql:ro
+      - ./flyway_migrations:/flyway/sql
+
+
     env_file:
       - .env
     environment:
@@ -38,6 +38,7 @@ services:
       FLYWAY_PASSWORD: ${APP_DB_PASSWORD}
       FLYWAY_SCHEMAS: ${APP_SCHEMA}
       FLYWAY_LOCATIONS: 'filesystem:/flyway/sql'
+
     networks:
       - infrastructure-network-ext
 
