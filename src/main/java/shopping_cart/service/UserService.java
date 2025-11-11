@@ -4,36 +4,35 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import shopping_cart.entity.UserEntity;
 import shopping_cart.mapper.UserMapper;
-import shopping_cart.model.User;
+import shopping_cart.model.user.mapper.UserMapperStruct;
+import shopping_cart.model.user.*;
+import shopping_cart.exception.NotFoundException;
+import shopping_cart.model.user.request.CreateUserRequestDto;
+import shopping_cart.model.user.response.UserResponseDto;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
-  private final UserMapper userMapper;
+    private final UserMapperStruct userMapperStruct;
+    private final UserMapper userMapper; // MyBatis mapper
 
-  public List<User> getAllUsers() {
-    List<User> users = new ArrayList<>();
-    var entities = userMapper.getAllUsers();
-    for (var entity : entities) {
-      users.add(new User(entity.getName(), entity.getAge()));
+    public List<UserResponseDto> getAllUsers() {
+        return userMapper.getAll().stream()
+                .map(userMapperStruct::toResponse)
+                .toList();
     }
-    return users;
-  }
 
-  public UserEntity addUser(User user) {
-    UserEntity entity = new UserEntity();
-    entity.setId(UUID.randomUUID());
-    entity.setAge(user.getAge());
-    entity.getName();
-    userMapper.insertUser(entity);
+    public UserResponseDto getUserById(UUID id) {
+        var entity = userMapper.getUserById(id);
+        if (entity == null) throw new NotFoundException("User not found: " + id);
+        return userMapperStruct.toResponse(entity);
+    }
 
-    return userMapper.getAllUsers().stream()
-        .filter(entity1 -> entity.getId().equals(entity1.getId()))
-        .findFirst()
-        .orElse(null);
-  }
+    public void createUser(CreateUserRequestDto request) {
+        UserEntity entity = userMapperStruct.toEntity(request);
+        userMapper.insert(entity);
+    }
 }

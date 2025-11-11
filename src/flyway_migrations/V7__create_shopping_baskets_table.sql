@@ -1,0 +1,7 @@
+CREATE TABLE shopping_baskets (
+    id UUID PRIMARY KEY,
+    user_id UUID REFERENCES app_user(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    is_shared BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+);

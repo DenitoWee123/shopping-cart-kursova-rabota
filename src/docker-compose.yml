@@ -1,6 +1,8 @@
 services:
   shopping-cart-service:
-    build: .
+    build:
+      context: ..
+      dockerfile: src/Dockerfile
     image: ghcr.io/your-username/shopping-cart:latest
     container_name: shopping-cart-local
     ports:
@@ -27,7 +29,7 @@ services:
     container_name: shopping-cart-migrator
     command: migrate
     volumes:
-      - ./src/main/resources/db/migration:/flyway/sql
+      - ./flyway_migrations:/flyway/sql:ro
     env_file:
       - .env
     environment:

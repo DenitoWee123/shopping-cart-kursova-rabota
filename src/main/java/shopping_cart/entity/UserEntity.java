@@ -1,16 +1,17 @@
 package shopping_cart.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-@NoArgsConstructor
-@Getter
-@Setter
+@Data
+@Builder
 public class UserEntity {
-  private String name;
-  private UUID id;
-  private int age;
+    private String id; // UUID / String db
+    private String username;
+    private String email;
+    private String passwordHash;
+    private String location;
+    private LocalDateTime createdAt; // check which date time
 }

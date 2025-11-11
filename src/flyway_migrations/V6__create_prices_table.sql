@@ -1,0 +1,7 @@
+CREATE TABLE prices (
+    id UUID PRIMARY KEY,
+    product_id UUID REFERENCES product(id) ON DELETE CASCADE,
+    store_id UUID REFERENCES store(id) ON DELETE CASCADE,
+    price DECIMAL(10, 2) NOT NULL,
+    timestamp TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+);
