@@ -16,4 +16,5 @@ public class ProductEntity {
     private String description;
     private String sku;
     private OffsetDateTime createdAt;
+    private String imageUrl;
 }

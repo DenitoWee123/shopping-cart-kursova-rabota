@@ -12,7 +12,10 @@ public interface PriceReportMapper {
 
     @Insert("""
         INSERT INTO price_report (id, user_id, product_id, store_id, price, created_at)
-        VALUES (#{id}, #{userId}, #{productId}, #{storeId}, #{price}, #{createdAt})
+        VALUES (#{id, typeHandler=shopping_cart.config.UUIDTypeHandler}, 
+        #{userId, typeHandler=shopping_cart.config.UUIDTypeHandler}, 
+        #{productId, typeHandler=shopping_cart.config.UUIDTypeHandler}, 
+        #{storeId, typeHandler=shopping_cart.config.UUIDTypeHandler}, #{price}, #{createdAt})
     """)
     void insert(PriceReportEntity report);
 }

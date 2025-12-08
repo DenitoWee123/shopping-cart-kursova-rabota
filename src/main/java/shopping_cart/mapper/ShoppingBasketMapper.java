@@ -12,7 +12,9 @@ public interface ShoppingBasketMapper {
 
     @Insert("""
         INSERT INTO shopping_basket (id, user_id, name, is_shared, created_at)
-        VALUES (#{id}, #{userId}, #{name}, #{isShared}, #{createdAt})
+        VALUES (#{id, typeHandler=shopping_cart.config.UUIDTypeHandler}, 
+        #{userId, typeHandler=shopping_cart.config.UUIDTypeHandler}, 
+        #{name}, #{isShared}, #{createdAt})
     """)
     void insert(ShoppingBasketEntity basket);
 }

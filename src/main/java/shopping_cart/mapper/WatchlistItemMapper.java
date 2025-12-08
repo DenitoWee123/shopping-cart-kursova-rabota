@@ -12,7 +12,10 @@ public interface WatchlistItemMapper {
 
     @Insert("""
         INSERT INTO watchlist_item (id, user_id, product_id, target_price, created_at)
-        VALUES (#{id}, #{userId}, #{productId}, #{targetPrice}, #{createdAt})
+        VALUES (#{id, typeHandler=shopping_cart.config.UUIDTypeHandler}, 
+        #{userId, typeHandler=shopping_cart.config.UUIDTypeHandler}, 
+        #{productId, typeHandler=shopping_cart.config.UUIDTypeHandler}, 
+        #{targetPrice}, #{createdAt})
     """)
     void insert(WatchlistItemEntity item);
 }

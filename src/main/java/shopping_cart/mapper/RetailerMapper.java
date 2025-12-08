@@ -13,7 +13,8 @@ public interface RetailerMapper {
 
     @Insert("""
         INSERT INTO retailer (id, name, website_url, created_at)
-        VALUES (#{id}, #{name}, #{websiteUrl}, #{createdAt})
+        VALUES (#{id, typeHandler=shopping_cart.config.UUIDTypeHandler}, 
+        #{name}, #{websiteUrl}, #{createdAt})
     """)
     void insert(RetailerEntity retailer);
 }

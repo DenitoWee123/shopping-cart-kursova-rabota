@@ -16,7 +16,8 @@ public interface UserMapper {
 
     @Insert("""
         INSERT INTO app_user (id, username, email, password_hash, location, created_at)
-        VALUES (#{id}, #{username}, #{email}, #{passwordHash}, #{location}, #{createdAt})
+        VALUES (#{id, typeHandler=shopping_cart.config.UUIDTypeHandler}, 
+        #{username}, #{email}, #{passwordHash}, #{location}, #{createdAt})
     """)
     void insert(UserEntity user);
 }
