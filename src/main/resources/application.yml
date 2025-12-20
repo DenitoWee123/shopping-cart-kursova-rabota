@@ -19,3 +19,20 @@ spring:
   flyway:
     enabled: true
     schemas: shopping_cart
+
+server:
+  port: 8081
+
+downloads:
+  dir:
+
+fantastiko:
+  url: "https://www.fantastico.bg/special-offers"
+
+
+billa:
+  url: "https://www.billa.bg/"
+
+kaufland:
+    url: "https://www.kaufland.bg/broshuri.html"
+
