@@ -15,6 +15,6 @@ public interface RetailerMapper {
     """)
   void insert(RetailerEntity retailer);
 
-  @Select("SELECT * FROM retailers WHERE id = #{id, typeHandler=UUIDTypeHandler}")
+  @Select("SELECT * FROM retailers WHERE id = #{id}")
   RetailerEntity findById(UUID id);
 }

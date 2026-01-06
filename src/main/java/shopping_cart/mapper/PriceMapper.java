@@ -15,12 +15,7 @@ public interface PriceMapper {
 
     @Insert("""
      INSERT INTO prices (id, product_id, store_id, price, currency, created_at) -- ТУК ВЕЧЕ СА 6 КОЛОНИ (+currency)
-     VALUES (#{id, typeHandler=shopping_cart.config.UUIDTypeHandler},
-             #{productId, typeHandler=shopping_cart.config.UUIDTypeHandler},
-             #{storeId, typeHandler=shopping_cart.config.UUIDTypeHandler},
-             #{price}, 
-             #{currency},  
-             #{createdAt})
+     VALUES (#{id}, #{productId}, #{storeId}, #{price}, #{currency}, #{createdAt})
      """)
 
     void insert(PriceEntity price);

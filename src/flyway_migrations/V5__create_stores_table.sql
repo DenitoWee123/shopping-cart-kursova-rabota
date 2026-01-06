@@ -1,6 +1,6 @@
 CREATE TABLE stores (
-    id UUID PRIMARY KEY,
-    retailer_id UUID REFERENCES retailer(id) ON DELETE CASCADE,
+    id VARCHAR(255) PRIMARY KEY,
+    retailer_id VARCHAR(255) REFERENCES retailer(id) ON DELETE CASCADE,
     address VARCHAR(255) NOT NULL,
     latitude DOUBLE PRECISION,
     longitude DOUBLE PRECISION,

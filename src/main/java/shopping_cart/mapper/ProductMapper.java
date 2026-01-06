@@ -9,7 +9,7 @@ public interface ProductMapper {
     @Insert("""
         INSERT INTO products (id, name, category, description, sku, created_at)
         VALUES (
-            #{id, typeHandler=shopping_cart.config.UUIDTypeHandler}, 
+            #{id}, 
             #{name}, 
             #{category}, 
             #{description}, 

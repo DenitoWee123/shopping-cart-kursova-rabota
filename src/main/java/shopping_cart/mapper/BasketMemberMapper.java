@@ -13,10 +13,7 @@ public interface BasketMemberMapper {
 
     @Insert("""
         INSERT INTO basket_member (id, basket_id, user_id, role, created_at)
-        VALUES (#{id, typeHandler=shopping_cart.config.UUIDTypeHandler}, 
-        #{basketId, typeHandler=shopping_cart.config.UUIDTypeHandler}, 
-        #{userId, typeHandler=shopping_cart.config.UUIDTypeHandler}, 
-        #{role}, #{createdAt})
+        VALUES (#{id}, #{basketId}, #{userId}, #{role}, #{createdAt})
     """)
     void insert(BasketMemberEntity member);
 }

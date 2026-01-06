@@ -1,7 +1,7 @@
 CREATE TABLE shopping_history (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES app_user(id),
-    basket_id UUID,
+    id VARCHAR(255) PRIMARY KEY DEFAULT,
+    user_id VARCHAR(255) REFERENCES app_user(id),
+    basket_id VARCHAR(255),
     basket_name VARCHAR(255),
     total_spent DECIMAL(10, 2),
     currency VARCHAR(3) DEFAULT 'BGN',

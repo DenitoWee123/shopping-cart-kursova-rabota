@@ -13,9 +13,7 @@ public interface StoreMapper {
 
     @Insert("""
         INSERT INTO store (id, retailer_id, address, latitude, longitude, created_at)
-        VALUES (#{id, typeHandler=shopping_cart.config.UUIDTypeHandler}, 
-        #{retailerId, typeHandler=shopping_cart.config.UUIDTypeHandler}, 
-        #{address}, #{latitude}, #{longitude}, #{createdAt})
+        VALUES (#{id}, #{retailerId}, #{address}, #{latitude}, #{longitude}, #{createdAt})
     """)
     void insert(StoreEntity store);
 }
