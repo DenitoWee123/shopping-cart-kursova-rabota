@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import shopping_cart.entity.BasketItemEntity;
+import shopping_cart.entity.HistoryEntity;
 import shopping_cart.entity.ShoppingBasketEntity;
 import shopping_cart.model.domain.BasketItem;
 import shopping_cart.model.domain.ShoppingBasketDto;
+import shopping_cart.model.response.BasketSelectionResponse;
 import shopping_cart.model.session.Session;
 import shopping_cart.repository.cache.SessionCacheRepository;
 import shopping_cart.service.BasketService;
@@ -22,6 +24,7 @@ import java.util.UUID;
 public class UnifiedBasketFacade {
   private final BasketService basketService;
   private final SessionCacheRepository sessionCache;
+  private final HistoryFacade historyFacade;
 
   @Transactional
   public void createCart(String sessionId, String name) {
@@ -154,21 +157,25 @@ public class UnifiedBasketFacade {
     return basketService.findAllForUser(session.getUserId());
   }
 
-  public String selectBasket(String sessionId, String basketId) {
-    var session = sessionCache.get(UUID.fromString(sessionId));
-    StringBuilder builder = new StringBuilder();
-    if (session == null) {
-      builder.append("Session Expired please re-log again");
-      return builder.toString();
-    }
-    var basketResult = basketService.getBasket(basketId);
-    if (basketResult != null) {
-      builder.append("basket: ").append(basketResult.getName()).append(" selected successfully");
-      session.setCartId(UUID.fromString(basketId));
-      sessionCache.update(UUID.fromString(sessionId), session);
-      return builder.toString();
-    }
-    return builder.append("Cart with id").append(basketId).append("not found").toString();
+  @Transactional
+  public BasketSelectionResponse selectBasket(String sessionId, String basketId) {
+    var session = getSession(sessionId);
+
+    // 1. Сменяме активната количка
+    session.setCartId(UUID.fromString(basketId));
+    sessionCache.update(UUID.fromString(sessionId), session);
+
+    // 2. Вземаме текущите продукти
+    var currentBasket = getBasketDto(basketId);
+
+    // 3. ПРЕИЗПОЛЗВАМЕ логиката от HistoryFacade за историята
+    var history = historyFacade.getHistory(sessionId);
+
+    return BasketSelectionResponse.builder()
+        .message("Basket selected")
+        .currentBasket(currentBasket)
+        .history(history)
+        .build();
   }
 
   private void validateMembership(String basketId, String userId) {

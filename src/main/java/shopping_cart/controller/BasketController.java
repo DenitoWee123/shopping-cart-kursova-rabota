@@ -7,6 +7,7 @@ import shopping_cart.entity.BasketItemEntity;
 import shopping_cart.entity.ShoppingBasketEntity;
 import shopping_cart.facade.UnifiedBasketFacade;
 import shopping_cart.model.domain.ShoppingBasketDto;
+import shopping_cart.model.response.BasketSelectionResponse;
 
 import java.util.List;
 
@@ -45,7 +46,7 @@ public class BasketController {
   }
 
   @PostMapping("/select/cart")
-  public ResponseEntity<String> selectCarts(
+  public ResponseEntity<BasketSelectionResponse> selectCarts(
       @RequestHeader("Session-Id") String sessionId, @RequestParam String basketId) {
     return ResponseEntity.ok(basketFacade.selectBasket(sessionId, basketId));
   }
