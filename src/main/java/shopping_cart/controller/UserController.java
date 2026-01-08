@@ -47,7 +47,7 @@ public class UserController {
     return ResponseEntity.ok(userFacade.changePassword(request));
   }
 
-  @PostMapping("/change-password")
+  @PostMapping("/change-username")
   public ResponseEntity<ChangeUsernameResponse> changeUsername(
       @RequestBody ChangeUsernameRequest request) {
 
