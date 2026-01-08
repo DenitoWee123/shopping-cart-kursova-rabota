@@ -54,27 +54,23 @@ public interface BasketMapper {
   List<BasketMemberEntity> findMembers(String basketId);
 
   @Select(
-"""
-    SELECT
-        sb.id,
-        sb.name,
-        sb.share_code,
-        sb.owner_id,
-        sb.created_at,
-        bm.user_id as member_id -- вземаме го от join-а
-    FROM shopping_baskets sb
+      """
+    SELECT sb.* FROM shopping_baskets sb
     JOIN basket_members bm ON sb.id = bm.basket_id
     WHERE bm.user_id = #{userId}
-""")
+  """)
   @Results(
-      id = "BasketWithMemberMap",
+      id = "BasketWithMembersDetailedMap",
       value = {
         @Result(property = "id", column = "id"),
         @Result(property = "name", column = "name"),
         @Result(property = "shareCode", column = "share_code"),
         @Result(property = "ownerId", column = "owner_id"),
         @Result(property = "createdAt", column = "created_at"),
-        @Result(property = "userId", column = "member_id")
+        @Result(
+            property = "members",
+            column = "id",
+            many = @Many(select = "shopping_cart.mapper.BasketMapper.findUsernamesByBasketId"))
       })
   List<ShoppingBasketEntity> findAllByUserId(String userId);
 
