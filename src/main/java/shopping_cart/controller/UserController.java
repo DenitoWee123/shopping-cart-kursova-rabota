@@ -6,9 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shopping_cart.facade.UserFacade;
-import shopping_cart.model.user.request.CreateUserRequest;
-import shopping_cart.model.user.request.LoginRequest;
-import shopping_cart.model.user.request.UpdatePasswordRequest;
+import shopping_cart.model.user.request.*;
+import shopping_cart.model.user.response.ChangeUsernameResponse;
 import shopping_cart.model.user.response.LoginUserResponse;
 import shopping_cart.model.user.response.RegisterUserAttemptResponse;
 import shopping_cart.model.user.response.UpdatePasswordResponse;
@@ -39,5 +38,19 @@ public class UserController {
             updatePasswordRequest.getToken(),
             updatePasswordRequest.getNewPassword(),
             updatePasswordRequest.getConfirmPassword()));
+  }
+
+  @PostMapping("/change-password")
+  public ResponseEntity<UpdatePasswordResponse> changePassword(
+      @RequestBody ChangePasswordRequest request) {
+
+    return ResponseEntity.ok(userFacade.changePassword(request));
+  }
+
+  @PostMapping("/change-username")
+  public ResponseEntity<ChangeUsernameResponse> changeUsername(
+      @RequestBody ChangeUsernameRequest request) {
+
+    return ResponseEntity.ok(userFacade.changeUsername(request));
   }
 }
