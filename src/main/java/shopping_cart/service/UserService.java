@@ -8,6 +8,7 @@ import shopping_cart.mapper.UserMapper;
 import shopping_cart.model.domain.User;
 import shopping_cart.model.user.request.ChangeUsernameRequest;
 import shopping_cart.model.user.request.CreateUserRequest;
+import shopping_cart.model.user.response.ChangeUsernameResponse;
 import shopping_cart.model.user.response.RegisterUserAttemptResponse;
 import shopping_cart.model.user.response.UpdatePasswordResponse;
 
@@ -120,8 +121,8 @@ public class UserService {
   }
 
   public UpdatePasswordResponse changePassword(
-      String userId, String oldPassword, String newPassword, String confirmPassword) {
-    User user = findById(userId);
+      String email, String oldPassword, String newPassword, String confirmPassword) {
+    User user = findById(email);
 
     if (!user.getRawPassword().equals(oldPassword)) {
       return UpdatePasswordResponse.builder()
@@ -137,7 +138,7 @@ public class UserService {
           .build();
     }
 
-    userMapper.updatePasswordById(userId, textEncryptor.encrypt(newPassword));
+    userMapper.updatePasswordById(email, textEncryptor.encrypt(newPassword));
 
     return UpdatePasswordResponse.builder()
         .errorCode(1000)
@@ -145,23 +146,23 @@ public class UserService {
         .build();
   }
 
-  public UpdatePasswordResponse changeUsername(String userId, ChangeUsernameRequest request) {
+  public ChangeUsernameResponse changeUsername(String userId, ChangeUsernameRequest request) {
     User user = findById(userId);
 
     if (!user.getEmail().equalsIgnoreCase(request.getEmail())) {
-      return UpdatePasswordResponse.builder()
+      return ChangeUsernameResponse.builder()
           .errorCode(5005)
           .message("Email does not match our records")
           .build();
     }
 
     if (!user.getRawPassword().equals(request.getCurrentPassword())) {
-      return UpdatePasswordResponse.builder().errorCode(5006).message("Incorrect password").build();
+      return ChangeUsernameResponse.builder().errorCode(5006).message("Incorrect password").build();
     }
 
     userMapper.updateUsername(userId, request.getNewUsername());
 
-    return UpdatePasswordResponse.builder()
+    return ChangeUsernameResponse.builder()
         .errorCode(1000)
         .message("Username changed successfully to: " + request.getNewUsername())
         .build();

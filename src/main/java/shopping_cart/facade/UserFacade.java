@@ -11,6 +11,7 @@ import shopping_cart.model.user.request.ChangePasswordRequest;
 import shopping_cart.model.user.request.ChangeUsernameRequest;
 import shopping_cart.model.user.request.CreateUserRequest;
 import shopping_cart.model.user.request.LoginRequest;
+import shopping_cart.model.user.response.ChangeUsernameResponse;
 import shopping_cart.model.user.response.LoginUserResponse;
 import shopping_cart.model.user.response.RegisterUserAttemptResponse;
 import shopping_cart.model.user.response.UpdatePasswordResponse;
@@ -73,21 +74,16 @@ public class UserFacade {
     return userService.updatePassword(token, newPassword, confirmPassword);
   }
 
-  public UpdatePasswordResponse changePassword(String sessionId, ChangePasswordRequest request) {
-    var session = sessionCache.get(UUID.fromString(sessionId));
-    if (session == null) throw new RuntimeException("Invalid Session");
-
+  public UpdatePasswordResponse changePassword(ChangePasswordRequest request) {
     return userService.changePassword(
-        session.getUserId(),
+        request.getEmail(),
         request.getOldPassword(),
         request.getNewPassword(),
         request.getConfirmPassword());
   }
 
-  public UpdatePasswordResponse changeUsername(String sessionId, ChangeUsernameRequest request) {
-    var session = sessionCache.get(UUID.fromString(sessionId));
-    if (session == null) throw new RuntimeException("Invalid Session");
+  public ChangeUsernameResponse changeUsername(ChangeUsernameRequest request) {
 
-    return userService.changeUsername(session.getUserId(), request);
+    return userService.changeUsername(request.getEmail(), request);
   }
 }
