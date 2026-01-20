@@ -45,6 +45,10 @@ public class BasketService {
     basketMapper.updateQuantity(itemId, quantity);
   }
 
+  public void updatePurchasedStatus(String basketId, String productId, boolean purchased) {
+    basketMapper.updatePurchasedStatus(basketId, productId, purchased);
+  }
+
   public void removeItemFromBasket(String basketId, String productId) {
     basketMapper.removeItem(basketId, productId);
   }

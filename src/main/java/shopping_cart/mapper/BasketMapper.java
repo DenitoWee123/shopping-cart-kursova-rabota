@@ -115,6 +115,7 @@ public interface BasketMapper {
             bi.quantity,
             bi.added_by,
             bi.added_at,
+            bi.purchased,
             p.raw_name,
             p.price,
             s.name as store_name
@@ -132,6 +133,7 @@ public interface BasketMapper {
         @Result(property = "quantity", column = "quantity"),
         @Result(property = "addedBy", column = "added_by"),
         @Result(property = "addedAt", column = "added_at"),
+        @Result(property = "purchased", column = "purchased"),
         @Result(property = "rawName", column = "raw_name"),
         @Result(property = "price", column = "price"),
         @Result(property = "storeName", column = "store_name")
@@ -147,12 +149,16 @@ public interface BasketMapper {
         @Result(property = "productId", column = "product_id"),
         @Result(property = "quantity", column = "quantity"),
         @Result(property = "addedBy", column = "added_by"),
-        @Result(property = "addedAt", column = "added_at")
+        @Result(property = "addedAt", column = "added_at"),
+        @Result(property = "purchased", column = "purchased")
       })
   BasketItemEntity findItemById(@Param("basketId") String basketId, @Param("id") String id);
 
   @Update("UPDATE basket_items SET quantity = #{quantity} WHERE id = #{id}")
   void updateQuantity(@Param("id") String id, @Param("quantity") Integer quantity);
+
+  @Update("UPDATE basket_items SET purchased = #{purchased} WHERE basket_id = #{basketId} AND product_id = #{productId}")
+  void updatePurchasedStatus(@Param("basketId") String basketId, @Param("productId") String productId, @Param("purchased") boolean purchased);
 
   @Delete("DELETE FROM basket_items WHERE basket_id = #{basketId} AND product_id = #{productId}")
   void removeItem(@Param("basketId") String basketId, @Param("productId") String productId);

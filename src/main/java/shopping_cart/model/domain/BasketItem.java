@@ -13,5 +13,6 @@ public class BasketItem {
   private final int quantity;
   private final String storeName;
   private final BigDecimal price;
+  private final boolean purchased;
   private final PriceComparisonDto lowerPriceItem;
 }
