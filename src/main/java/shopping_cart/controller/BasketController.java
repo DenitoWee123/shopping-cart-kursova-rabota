@@ -59,6 +59,15 @@ public class BasketController {
     return ResponseEntity.ok(basketFacade.updateQuantity(sessionId, basketItemId, quantity));
   }
 
+  @PatchMapping("/toggle-purchased")
+  public ResponseEntity<ShoppingBasketDto> togglePurchased(
+          @RequestHeader("Session-Id") String sessionId,
+          @RequestParam String cartId,
+          @RequestParam String productId,
+          @RequestParam boolean purchased) {
+    return ResponseEntity.ok(basketFacade.togglePurchased(sessionId, cartId, productId, purchased));
+  }
+
   @DeleteMapping("/item/{productId}")
   public ResponseEntity<ShoppingBasketDto> removeItem(
       @RequestHeader("Session-Id") String sessionId, @PathVariable String productId) {

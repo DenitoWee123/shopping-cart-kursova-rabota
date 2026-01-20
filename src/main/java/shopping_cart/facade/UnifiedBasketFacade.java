@@ -134,6 +134,16 @@ public class UnifiedBasketFacade {
   }
 
   @Transactional
+  public ShoppingBasketDto togglePurchased(String sessionId, String cartId, String productId, boolean purchased) {
+    var session = getSession(sessionId);
+    validateMembership(cartId, session.getUserId());
+
+    basketService.updatePurchasedStatus(cartId, productId, purchased);
+
+    return getEnrichedBasketResponse(cartId);
+  }
+
+  @Transactional
   public void joinCartViaCode(String sessionId, String shareCode) {
     var session = getSession(sessionId);
     String basketId = basketService.getIdBySharedCode(shareCode);
